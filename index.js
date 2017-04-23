@@ -1,7 +1,7 @@
 /* jshint node: true, esversion:6, laxbreak: true */
 /**
  * predictAge
- * v0.0.2
+ * v0.0.3
  *
  * Predict the age of a string's author.
  *
@@ -146,5 +146,4 @@
   } else {
     root.predictAge = predictAge
   }
-  console.log(predictAge(`Corbyn and Labour have made a good start to the #GeneralElection campaign. Now watch as the media attack dogs try to bring him down #Marr`))
 }).call(this)
