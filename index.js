@@ -140,6 +140,9 @@
     // if string is null return 0
     if (str == null) return 0
 
+    // trim whitespace and convert to lowercase
+    str = str.toLowerCase().trim()
+
     // convert our string to tokens
     const tokens = tokenizer(str)
 
