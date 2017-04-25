@@ -1,6 +1,6 @@
-# predictAge
+# predictage - Node.js based Age Prediction
 
-Predict the age of a string's author
+Predict the age of a string's author.
 
 ## Usage
 ```Javascript
@@ -18,7 +18,7 @@ Schwartz, H. A., Eichstaedt, J. C., Kern, M. L., Dziurzynski, L., Ramones, S. M.
 Using the age lexicon data from http://www.wwbp.org/lexica.html
 Used under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported licence
 
-# Licence
+## Licence
 (C) 2017 P. Hughes
 Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
 [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/)
