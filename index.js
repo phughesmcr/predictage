@@ -62,18 +62,20 @@
   */
   const getMatches = (arr) => {
     let matches = {}
-
-    // loop through the lexicon data
-    for (var key in lexicon.AGE) {
-      if (!lexicon.AGE.hasOwnProperty(key)) continue
+    // loop through the lexicon
+    const data = lexicon.AGE
+    let key
+    for (key in data) {
+      if (!data.hasOwnProperty(key)) continue
       let match = []
       if (arr.indexOf(key) > -1) {  // if there is a match between lexicon and input
         let item
-        let weight = lexicon.AGE[key]
+        let weight = data[key]
         let reps = arr.indexesOf(key).length  // numbder of times the word appears in the input text
         if (reps > 1) { // if the word appears more than once, group all appearances in one array
           let words = []
-          for (let i = 0; i < reps; i++) {
+          let i
+          for (i = 0; i < reps; i++) {
             words.push(key)
           }
           item = [words, weight]
@@ -84,7 +86,6 @@
         matches[key] = match
       }
     }
-
     // return matches object
     return matches
   }
@@ -100,9 +101,9 @@
   const calcLex = (obj, wc, int) => {
     let counts = []   // number of matched objects
     let weights = []  // weights of matched objects
-
     // loop through the matches and get the word frequency (counts) and weights
-    for (let key in obj) {
+    let key
+    for (key in obj) {
       if (!obj.hasOwnProperty(key)) continue
       if (Array.isArray(obj[key][0][0])) {  // if the first item in the match is an array, the item is a duplicate
         counts.push(obj[key][0][0].length)  // for duplicate matches
@@ -111,24 +112,14 @@
       }
       weights.push(obj[key][0][1])          // corresponding weight
     }
-
     // calculate lexical usage value
-    let sums = []
+    let lex = 0
     counts.forEach(function (a, b) {
       // (word frequency / total word count) * weight
-      let sum = (a / wc) * weights[b]
-      sums.push(sum)
+      lex += (a / wc) * weights[b]
     })
-
-    // get sum of values
-    let lex
-    lex = sums.reduce(function (a, b) { return a + b }, 0)
-
-    // add the intercept value
-    lex = Number(lex) + Number(int)
-
-    // return final lexical value
-    return lex
+    // return final lexical value + intercept
+    return lex + int
   }
 
   /**
@@ -139,28 +130,18 @@
   const predictAge = (str) => {
     // if string is null return 0
     if (str == null) return 0
-
+    // make sure str is a string
+    if (typeof str !== 'string') str = str.toString()
     // trim whitespace and convert to lowercase
     str = str.toLowerCase().trim()
-
     // convert our string to tokens
     const tokens = tokenizer(str)
-
     // if there are no tokens return 0
     if (tokens == null) return 0
-
     // get matches from array
     const matches = getMatches(tokens)
-
-    // get wordcount
-    const wordcount = tokens.length
-
-    // set intercept value
-    const int = 23.2188604687
-
     // calculate lexical useage
-    const age = calcLex(matches, wordcount, int)
-
+    const age = calcLex(matches, tokens.length, 23.2188604687)
     // return predicted age as a number
     return age
   }
