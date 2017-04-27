@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v0.0.4
+ * v0.1.1
  *
  * Predict the age of a string's author.
  *
@@ -118,8 +118,10 @@
       // (word frequency / total word count) * weight
       lex += (a / wc) * weights[b]
     })
+    // add int
+    lex = lex + int
     // return final lexical value + intercept
-    return lex + int
+    return lex
   }
 
   /**
