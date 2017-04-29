@@ -1,16 +1,17 @@
 {
   "name": "predictage",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Predict the age of a string's author",
   "main": "index.js",
   "dependencies": {
-    "happynodetokenizer": "0.0.4"
+    "happynodetokenizer": "^0.1.0"
   },
   "keywords": [
     "psychology",
     "prediction",
     "age",
-    "predict"
+    "predict",
+    "sentiment"
   ],
   "author": "P. Hughes <peter@phugh.es> (http://www.phugh.es)",
   "license": "CC-BY-NC-SA-3.0",
