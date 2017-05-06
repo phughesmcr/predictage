@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v0.1.2
+ * v0.1.3
  *
  * Predict the age of a string's author.
  *
@@ -23,8 +23,8 @@
  * let age = pa(text);
  * console.log(age)
  *
- * @param {string} str  {input string}
- * @return {number} {predicted age}
+ * @param {string} str  input string
+ * @return {number} predicted age
  */
 
 'use strict'
@@ -46,8 +46,9 @@
 
   // get number of times el appears in an array
   Array.prototype.indexesOf = function (el) {
-    var idxs = []
-    for (var i = this.length - 1; i >= 0; i--) {
+    const idxs = []
+    let i = this.length - 1
+    for (i; i >= 0; i--) {
       if (this[i] === el) {
         idxs.unshift(i)
       }
@@ -57,11 +58,11 @@
 
   /**
   * @function getMatches
-  * @param  {array} arr {token array}
-  * @return {object} {object of matches in their respective categories}
+  * @param  {Array} arr token array
+  * @return {Object}  object of matches in their respective categories
   */
   const getMatches = (arr) => {
-    let matches = {}
+    const matches = {}
     // loop through the lexicon
     const data = lexicon.AGE
     let key
@@ -93,14 +94,14 @@
   /**
   * Calculate the lexical value of matched items in object
   * @function calcLex
-  * @param  {object} obj {object of matched items}
-  * @param  {number} wc  {total word count}
-  * @param  {number} int {intercept value}
-  * @return {number} {lexical value}
+  * @param  {Object} obj  object of matched items
+  * @param  {number} wc   total word count
+  * @param  {number} int  intercept value
+  * @return {number}  lexical value
   */
   const calcLex = (obj, wc, int) => {
-    let counts = []   // number of matched objects
-    let weights = []  // weights of matched objects
+    const counts = []   // number of matched objects
+    const weights = []  // weights of matched objects
     // loop through the matches and get the word frequency (counts) and weights
     let key
     for (key in obj) {
@@ -114,34 +115,37 @@
     }
     // calculate lexical usage value
     let lex = 0
-    let i
-    let len = counts.length
-    for (i = 0; i < len; i++) {
+    let i = 0
+    const len = counts.length
+    const words = Number(wc)
+    for (i; i < len; i++) {
+      let count = Number(counts[i])
+      let weight = Number(weights[i])
       // (word frequency / total word count) * weight
-      lex += (counts[i] / wc) * weights[i]
+      lex += (count / words) * weight
     }
     // add int
-    lex += int
+    lex += Number(int)
     // return final lexical value + intercept
-    return lex
+    return Number(lex)
   }
 
   /**
   * @function predictAge
-  * @param  {string} str {string input to analyse}
-  * @return {number} {predicted age}
+  * @param  {string} str  string input to analyse
+  * @return {number}  predicted age
   */
   const predictAge = (str) => {
-    // if string is null return 0
-    if (str == null) return 0
+    // if string is null return null
+    if (str == null) return null
     // make sure str is a string
     if (typeof str !== 'string') str = str.toString()
     // trim whitespace and convert to lowercase
     str = str.toLowerCase().trim()
     // convert our string to tokens
     const tokens = tokenizer(str)
-    // if there are no tokens return 0
-    if (tokens == null) return 0
+    // if there are no tokens return null
+    if (tokens == null) return null
     // get matches from array
     const matches = getMatches(tokens)
     // calculate lexical useage
