@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v0.1.3
+ * v0.2.0
  *
  * Predict the age of a string's author.
  *
@@ -19,11 +19,13 @@
  *
  * Usage example:
  * const pa = require('predictage);
+ * const ngrams = true  // include bigrams and trigrams - not recommended for long strings!
  * const text = "A big long string of text...";
- * let age = pa(text);
+ * let age = pa(text, ngrams);
  * console.log(age)
  *
  * @param {string} str  input string
+ * @param {Boolean} ngrams include bigrams and trigrams?
  * @return {number} predicted age
  */
 
@@ -36,11 +38,13 @@
 
   let tokenizer = root.tokenizer
   let lexicon = root.lexicon
+  let natural = root.natural
 
   if (typeof _ === 'undefined') {
     if (hasRequire) {
       tokenizer = require('happynodetokenizer')
       lexicon = require('./data/lexicon.json')
+      natural = require('natural')
     } else throw new Error('predictAge required happynodetokenizer and ./data/lexicon.json')
   }
 
@@ -57,47 +61,86 @@
   }
 
   /**
+  * @function getBigrams
+  * @param  {string} str input string
+  * @return {Array} array of bigram strings
+  */
+  const getBigrams = str => {
+    const NGrams = natural.NGrams
+    const bigrams = NGrams.bigrams(str)
+    const result = []
+    const len = bigrams.length
+    let i = 0
+    for (i; i < len; i++) {
+      result.push(bigrams[i].join(' '))
+    }
+    return result
+  }
+
+  /**
+  * @function getTrigrams
+  * @param  {string} str input string
+  * @return {Array} array of trigram strings
+  */
+  const getTrigrams = str => {
+    const NGrams = natural.NGrams
+    const trigrams = NGrams.trigrams(str)
+    const result = []
+    const len = trigrams.length
+    let i = 0
+    for (i; i < len; i++) {
+      result.push(trigrams[i].join(' '))
+    }
+    return result
+  }
+
+  /**
   * @function getMatches
   * @param  {Array} arr token array
-  * @return {Object}  object of matches in their respective categories
+  * @param  {Object} lexicon  lexicon object
+  * @return {Object}  object of matches
   */
-  const getMatches = (arr) => {
+  const getMatches = (arr, lexicon) => {
     const matches = {}
-    // loop through the lexicon
-    const data = lexicon.AGE
-    let key
-    for (key in data) {
-      if (!data.hasOwnProperty(key)) continue
+    // loop through the lexicon categories
+    let category
+    for (category in lexicon) {
+      if (!lexicon.hasOwnProperty(category)) continue
       let match = []
-      if (arr.indexOf(key) > -1) {  // if there is a match between lexicon and input
-        let item
-        let weight = data[key]
-        let reps = arr.indexesOf(key).length  // numbder of times the word appears in the input text
-        if (reps > 1) { // if the word appears more than once, group all appearances in one array
-          let words = []
-          let i
-          for (i = 0; i < reps; i++) {
-            words.push(key)
+      // loop through words in category
+      let data = lexicon[category]
+      let key
+      for (key in data) {
+        if (!data.hasOwnProperty(key)) continue
+        // if word from input matches word from lexicon ...
+        if (arr.indexOf(key) > -1) {
+          let item
+          let weight = data[key]
+          let reps = arr.indexesOf(key).length // numbder of times the word appears in the input text
+          if (reps > 1) { // if the word appears more than once, group all appearances in one array
+            let words = []
+            for (let i = 0; i < reps; i++) {
+              words.push(key)
+            }
+            item = [words, weight]
+          } else {
+            item = [key, weight]
           }
-          item = [words, weight]
-        } else {
-          item = [key, weight]
+          match.push(item)
         }
-        match.push(item)
-        matches[key] = match
       }
+      matches[category] = match
     }
     // return matches object
     return matches
   }
 
   /**
-  * Calculate the lexical value of matched items in object
   * @function calcLex
-  * @param  {Object} obj  object of matched items
-  * @param  {number} wc   total word count
-  * @param  {number} int  intercept value
-  * @return {number}  lexical value
+  * @param  {Object} obj      matches object
+  * @param  {number} wc       wordcount
+  * @param  {number} int      intercept value
+  * @return {number} lexical value
   */
   const calcLex = (obj, wc, int) => {
     const counts = []   // number of matched objects
@@ -106,36 +149,37 @@
     let key
     for (key in obj) {
       if (!obj.hasOwnProperty(key)) continue
-      if (Array.isArray(obj[key][0][0])) {  // if the first item in the match is an array, the item is a duplicate
-        counts.push(obj[key][0][0].length)  // for duplicate matches
+      if (Array.isArray(obj[key][0])) { // if the first item in the match is an array, the item is a duplicate
+        counts.push(obj[key][0].length) // for duplicate matches
       } else {
-        counts.push(1)                      // for non-duplicates
+        counts.push(1)                  // for non-duplicates
       }
-      weights.push(obj[key][0][1])          // corresponding weight
+      weights.push(obj[key][1])         // corresponding weight
     }
     // calculate lexical usage value
     let lex = 0
-    let i = 0
+    let i
     const len = counts.length
     const words = Number(wc)
-    for (i; i < len; i++) {
-      let count = Number(counts[i])
+    for (i = 0; i < len; i++) {
       let weight = Number(weights[i])
+      let count = Number(counts[i])
       // (word frequency / total word count) * weight
       lex += (count / words) * weight
     }
-    // add int
-    lex += Number(int)
-    // return final lexical value + intercept
-    return Number(lex)
+    // add intercept value
+    lex += int
+    // return final lexical value
+    return lex
   }
 
   /**
   * @function predictAge
   * @param  {string} str  string input to analyse
+  * @param  {Boolean} ngrams include bigrams and trigrams?
   * @return {number}  predicted age
   */
-  const predictAge = (str) => {
+  const predictAge = (str, ngrams) => {
     // if string is null return null
     if (str == null) return null
     // make sure str is a string
@@ -143,15 +187,22 @@
     // trim whitespace and convert to lowercase
     str = str.toLowerCase().trim()
     // convert our string to tokens
-    const tokens = tokenizer(str)
+    let tokens = tokenizer(str)
     // if there are no tokens return null
     if (tokens == null) return null
+    // get wordcount before we add ngrams
+    const wordcount = tokens.length
+    // handle bigrams and trigrams if wanted
+    if (ngrams) {
+      const bigrams = getBigrams(str)
+      const trigrams = getTrigrams(str)
+      tokens = tokens.concat(bigrams)
+      tokens = tokens.concat(trigrams)
+    }
     // get matches from array
-    const matches = getMatches(tokens)
-    // calculate lexical useage
-    const age = calcLex(matches, tokens.length, 23.2188604687)
+    const matches = getMatches(tokens, lexicon)
     // return predicted age as a number
-    return age
+    return calcLex(matches.AGE, wordcount, 23.2188604687)
   }
 
   predictAge.noConflict = function () {

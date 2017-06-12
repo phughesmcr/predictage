@@ -5,8 +5,9 @@ Predict the age of a string's author.
 ## Usage
 ```Javascript
 const pa = require('predictage')
+const ngrams = true  // include bigrams and trigrams - not recommended for long strings!
 let text = "A long string of text...."
-let age = pa(text)
+let age = pa(text, ngrams)
 ```
 
 ## Acknowledgements
