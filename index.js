@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v0.2.0
+ * v0.2.1
  *
  * Predict the age of a string's author.
  *
@@ -21,10 +21,10 @@
  * const pa = require('predictage);
  * const ngrams = true  // include bigrams and trigrams - not recommended for long strings!
  * const text = "A big long string of text...";
- * let age = pa(text, ngrams);
+ * const age = pa(text, ngrams);
  * console.log(age)
  *
- * @param {string} str  input string
+ * @param {string} str input string
  * @param {Boolean} ngrams include bigrams and trigrams?
  * @return {number} predicted age
  */
@@ -34,18 +34,16 @@
   const root = this
   const previous = root.predictAge
 
-  const hasRequire = typeof require !== 'undefined'
-
-  let tokenizer = root.tokenizer
   let lexicon = root.lexicon
   let natural = root.natural
+  let tokenizer = root.tokenizer
 
-  if (typeof _ === 'undefined') {
-    if (hasRequire) {
+  if (typeof lexicon === 'undefined') {
+    if (typeof require !== 'undefined') {
       tokenizer = require('happynodetokenizer')
       lexicon = require('./data/lexicon.json')
       natural = require('natural')
-    } else throw new Error('predictAge required happynodetokenizer and ./data/lexicon.json')
+    } else throw new Error('predictAge requires node modules happynodetokenizer and natural, and ./data/lexicon.json')
   }
 
   // get number of times el appears in an array
@@ -61,15 +59,15 @@
   }
 
   /**
+  * Get all the bigrams of a string and return as an array
   * @function getBigrams
   * @param  {string} str input string
   * @return {Array} array of bigram strings
   */
   const getBigrams = str => {
-    const NGrams = natural.NGrams
-    const bigrams = NGrams.bigrams(str)
-    const result = []
+    const bigrams = natural.NGrams.bigrams(str)
     const len = bigrams.length
+    const result = []
     let i = 0
     for (i; i < len; i++) {
       result.push(bigrams[i].join(' '))
@@ -78,15 +76,15 @@
   }
 
   /**
+  * Get all the trigrams of a string and return as an array
   * @function getTrigrams
   * @param  {string} str input string
   * @return {Array} array of trigram strings
   */
   const getTrigrams = str => {
-    const NGrams = natural.NGrams
-    const trigrams = NGrams.trigrams(str)
-    const result = []
+    const trigrams = natural.NGrams.trigrams(str)
     const len = trigrams.length
+    const result = []
     let i = 0
     for (i; i < len; i++) {
       result.push(trigrams[i].join(' '))
@@ -95,10 +93,11 @@
   }
 
   /**
+  * Match an array against a lexicon object
   * @function getMatches
   * @param  {Array} arr token array
-  * @param  {Object} lexicon  lexicon object
-  * @return {Object}  object of matches
+  * @param  {Object} lexicon lexicon object
+  * @return {Object} object of matches
   */
   const getMatches = (arr, lexicon) => {
     const matches = {}
@@ -109,22 +108,22 @@
       let match = []
       // loop through words in category
       let data = lexicon[category]
-      let key
-      for (key in data) {
-        if (!data.hasOwnProperty(key)) continue
+      let word
+      for (word in data) {
+        if (!data.hasOwnProperty(word)) continue
         // if word from input matches word from lexicon ...
-        if (arr.indexOf(key) > -1) {
+        if (arr.indexOf(word) > -1) {
           let item
-          let weight = data[key]
-          let reps = arr.indexesOf(key).length // numbder of times the word appears in the input text
+          let weight = data[word]
+          let reps = arr.indexesOf(word).length // number of times the word appears in the input text
           if (reps > 1) { // if the word appears more than once, group all appearances in one array
             let words = []
             for (let i = 0; i < reps; i++) {
-              words.push(key)
+              words.push(word)
             }
-            item = [words, weight]
+            item = [words, weight]  // i.e. [[word, word, word], weight]
           } else {
-            item = [key, weight]
+            item = [word, weight]   // i.e. [word, weight]
           }
           match.push(item)
         }
@@ -136,36 +135,34 @@
   }
 
   /**
+  * Calculate the total lexical value of matches
   * @function calcLex
-  * @param  {Object} obj      matches object
-  * @param  {number} wc       wordcount
-  * @param  {number} int      intercept value
+  * @param {Object} obj matches object
+  * @param {number} wc wordcount
+  * @param {number} int intercept value
   * @return {number} lexical value
   */
   const calcLex = (obj, wc, int) => {
     const counts = []   // number of matched objects
     const weights = []  // weights of matched objects
     // loop through the matches and get the word frequency (counts) and weights
-    let key
-    for (key in obj) {
-      if (!obj.hasOwnProperty(key)) continue
-      if (Array.isArray(obj[key][0])) { // if the first item in the match is an array, the item is a duplicate
-        counts.push(obj[key][0].length) // for duplicate matches
+    let word
+    for (word in obj) {
+      if (!obj.hasOwnProperty(word)) continue
+      if (Array.isArray(obj[word][0])) {  // if the first item in the match is an array, the item is a duplicate
+        counts.push(obj[word][0].length)  // state the number of times the duplicate item appears
       } else {
-        counts.push(1)                  // for non-duplicates
+        counts.push(1)                    // for non-duplicates, the word obviously only appears 1 time
       }
-      weights.push(obj[key][1])         // corresponding weight
+      weights.push(obj[word][1])          // corresponding weight
     }
     // calculate lexical usage value
     let lex = 0
-    let i
+    let i = 0
     const len = counts.length
-    const words = Number(wc)
-    for (i = 0; i < len; i++) {
-      let weight = Number(weights[i])
-      let count = Number(counts[i])
-      // (word frequency / total word count) * weight
-      lex += (count / words) * weight
+    for (i; i < len; i++) {
+      // (word frequency / total wordcount) * weight
+      lex += (Number(counts[i]) / wc) * Number(weights[i])
     }
     // add intercept value
     lex += int
@@ -196,8 +193,7 @@
     if (ngrams) {
       const bigrams = getBigrams(str)
       const trigrams = getTrigrams(str)
-      tokens = tokens.concat(bigrams)
-      tokens = tokens.concat(trigrams)
+      tokens = tokens.concat(bigrams, trigrams)
     }
     // get matches from array
     const matches = getMatches(tokens, lexicon)
