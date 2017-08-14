@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v0.3.0
+ * v0.4.0
  *
  * Predict the age of a string's author.
  *
@@ -23,13 +23,11 @@
  *
  * Usage example:
  * const pa = require('predictage);
- * const ngrams = true  // include bigrams and trigrams - not recommended for long strings!
  * const text = "A big long string of text...";
  * const age = pa(text, ngrams);
  * console.log(age)
  *
  * @param {string} str input string
- * @param {Boolean} ngrams include bigrams and trigrams?
  * @return {number} predicted age
  */
 
@@ -39,22 +37,28 @@
   const previous = root.predictAge
 
   let lexicon = root.lexicon
-  let natural = root.natural
+  let simplengrams = root.simplengrams
   let tokenizer = root.tokenizer
 
   if (typeof lexicon === 'undefined') {
     if (typeof require !== 'undefined') {
       tokenizer = require('happynodetokenizer')
       lexicon = require('./data/lexicon.json')
-      natural = require('natural')
-    } else throw new Error('predictAge requires node modules happynodetokenizer and natural, and ./data/lexicon.json')
+      simplengrams = require('simplengrams')
+    } else throw new Error('predictAge requires happynodetokenizer and simplengrams, and ./data/lexicon.json')
   }
 
-  // get number of times el appears in an array
-  function indexesOf (arr, el) {
+  /**
+   * Get the indexes of duplicate elements in an array
+   * @function indexesOf
+   * @param  {Array} arr input array
+   * @param  {string} el element to test against
+   * @return {Array} array of indexes
+   */
+  const indexesOf = (arr, el) => {
     const idxs = []
-    let i = arr.length - 1
-    for (i; i >= 0; i--) {
+    let i = arr.length
+    while (i--) {
       if (arr[i] === el) {
         idxs.unshift(i)
       }
@@ -63,22 +67,17 @@
   }
 
   /**
-  * Get all the n-grams of a string and return as an array
-  * @function getNGrams
-  * @param {string} str input string
-  * @param {number} n abitrary n-gram number, e.g. 2 = bigrams
-  * @return {Array} array of ngram strings
-  */
-  const getNGrams = (str, n) => {
-    // default to bi-grams on null n
-    if (n == null) n = 2
-    if (typeof n !== 'number') n = Number(n)
-    const ngrams = natural.NGrams.ngrams(str, n)
-    const len = ngrams.length
-    const result = []
+   * Combines multidimensional array elements into strings
+   * @function arr2string
+   * @param  {Array} arr input array
+   * @return {Array} output array
+   */
+  const arr2string = arr => {
     let i = 0
+    const len = arr.length
+    const result = []
     for (i; i < len; i++) {
-      result.push(ngrams[i].join(' '))
+      result.push(arr[i].join(' '))
     }
     return result
   }
@@ -164,10 +163,9 @@
   /**
   * @function predictAge
   * @param {string} str string input to analyse
-  * @param {Boolean} ngrams include bigrams and trigrams?
   * @return {number} predicted age
   */
-  const predictAge = (str, ngrams) => {
+  const predictAge = str => {
     // if string is null return null
     if (str == null) return null
     // make sure str is a string
@@ -180,11 +178,14 @@
     if (tokens == null) return null
     // get wordcount before we add ngrams
     const wordcount = tokens.length
-    // handle bigrams and trigrams if wanted
-    if (ngrams) {
-      const bigrams = getNGrams(str, 2)
-      const trigrams = getNGrams(str, 3)
-      tokens = tokens.concat(bigrams, trigrams)
+    // get n-grams
+    const ngrams = []
+    ngrams.push(arr2string(simplengrams(str, 2)))
+    ngrams.push(arr2string(simplengrams(str, 3)))
+    const nLen = ngrams.length
+    let i = 0
+    for (i; i < nLen; i++) {
+      tokens = tokens.concat(ngrams[i])
     }
     // get matches from array
     const matches = getMatches(tokens, lexicon)
