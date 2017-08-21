@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v0.5.0
+ * v0.5.1
  *
  * Predict the age of a string's author.
  *
@@ -23,6 +23,7 @@
  *
  * Usage example:
  * const pa = require('predictage');
+ * // These are the default options
  * const opts = {
  *  'output': 'age'
  *  'nGrams': true,
@@ -60,14 +61,14 @@
    * Get the indexes of duplicate elements in an array
    * @function indexesOf
    * @param  {Array} arr input array
-   * @param  {string} el element to test against
+   * @param  {string} str string to test against
    * @return {Array} array of indexes
    */
-  const indexesOf = (arr, el) => {
+  const indexesOf = (arr, str) => {
     const idxs = [];
     let i = arr.length;
     while (i--) {
-      if (arr[i] === el) {
+      if (arr[i] === str) {
         idxs.unshift(i);
       }
     }
@@ -97,7 +98,7 @@
    * @param  {string} by  what to sort by
    * @return {Array}
    */
-  const sortByUse = (arr, by) => {
+  const sortArrBy = (arr, by) => {
     let x = 3; // default to sort by lexical value
     if (by === 'weight') {
       x = 2;
@@ -111,7 +112,7 @@
   };
 
   /**
-   * Prepare an object to be sorted by sortByUse
+   * Prepare an object to be sorted by sortArrBy
    * @function prepareMatches
    * @param  {Object} obj input object
    * @param  {string} by  string
@@ -127,7 +128,7 @@
       lex = Number(lex.toFixed(places));
       matches.push([obj[word][0], obj[word][1], obj[word][2], lex]);
     }
-    return sortByUse(matches, by);
+    return sortArrBy(matches, by);
   };
 
   /**
@@ -190,9 +191,9 @@
 
   /**
   * @function predictAge
-  * @param {string} str string input to analyse
+  * @param {string} str input string
   * @param {Object} opts options object
-  * @return {number} predicted age
+  * @return {(number|Array)} predicted age or array of matched words
   */
   const predictAge = (str, opts) => {
     // no string return null
@@ -207,15 +208,15 @@
         'output': 'age',
         'nGrams': true,
         'wcGrams': false,
-        'sortBy': 'total',
-        'places': 7,
+        'sortBy': 'lex',
+        'places': 16,
       };
     }
     opts.output = opts.output || 'age';
-    opts.sortBy = opts.sortBy || 'total';
+    opts.sortBy = opts.sortBy || 'lex';
     opts.nGrams = opts.nGrams || true;
     opts.wcGrams = opts.wcGrams || false;
-    opts.places = opts.places || 10;
+    opts.places = opts.places || 16;
     const output = opts.output;
     const places = opts.places;
     // convert our string to tokens

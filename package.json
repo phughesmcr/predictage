@@ -1,6 +1,6 @@
 {
   "name": "predictage",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Predict the age of a string's author",
   "main": "index.js",
   "dependencies": {
