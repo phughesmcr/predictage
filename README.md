@@ -1,17 +1,19 @@
-# predictAge - Node.js based Age Prediction
+# predictAge - Node.js based age prediction!
 
 Predict the age of a string's author.
 
 ## Usage
 ```Javascript
 const pa = require('predictage')
-// These are the default options
-const opts = {
-  'output': 'age'
+const opts = {  // These are the default options
+  'encoding': 'freq',
+  'max': Number.POSITIVE_INFINITY,
+  'min': Number.NEGATIVE_INFINITY,
   'nGrams': true,
-  'wcGrams': false,
+  'output': 'age',
+  'places': 16,
   'sortBy': 'lex',
-  'places': 16
+  'wcGrams': false,
 }
 const text = 'A long string of text....'
 const age = pa(text, opts)
@@ -22,17 +24,31 @@ console.log(age)
 
 The options object is optional and provides a number of controls to allow you to tailor the output to your needs. However, for general use it is recommended that all options are left to their defaults.
 
+### 'encoding'
+
+**String - valid options: 'freq' (default), 'binary'**
+
+N.B - You probably don't want to change this, ever.
+
+Controls how the lexical value is calculated.
+
+Binary is simply the addition of lexical weights, i.e. word1 + word2 + word3.
+
+Frequency encoding takes the overall wordcount and word frequency into account, i.e. (word frequency / word count) * weight.
+
 ### 'output'
 
-**String - valid options: 'age' (default), 'matches', 'lex'**
+**String - valid options: 'age' (default), 'matches', 'lex', or 'full'**
 
-'age' (default) returns the predicted age to 0 decimal places.
+'age' (default) returns the predicted age to 0 decimal places (regardless of 'places' option).
 
 'lex' returns the lexical value, which is essentially the predicted age to 7 decimal places.
 
 The number of decimal places can be changed using the 'places' value in the options object. Note that setting 'places' to 0 produces the same result as setting 'output' to 'age'.
 
 'matches' returns an array of matched words along with the number of times each word appears, its weight, and its final lexical value (i.e. (appearances / word count) * weight). See the output section below for an example.
+
+'full' returns an object containing the lexical value and the matches array.
 
 ### 'nGrams'
 
@@ -66,11 +82,19 @@ By default the array is sorted by final lexical value, this is so you can see wh
 
 ### 'places'
 
-**Number**
+**Number - valid options between 0 and 20 inclusive.**
 
 Number of decimal places to limit outputted values to.
 
 The default is 16 decimal places as this is accuracy level the lexicon data provides.
+
+### 'max' and 'min'
+
+**Float**
+
+Exclude words that have weights above the max threshold or below the min threshold.
+
+By default these are set to infinity, ensuring that no words from the lexicon are excluded.
 
 
 ## {'output': 'matches'} output example
@@ -102,7 +126,7 @@ By default the matches output array is sorted ascending by lexical value. This c
 ## Acknowledgements
 
 ### References
-Schwartz, H. A., Eichstaedt, J. C., Kern, M. L., Dziurzynski, L., Ramones, S. M., Agrawal, M., Shah, A., Kosinski, M., Stillwell, D., Seligman, M. E., & Ungar, L. H. (2013). Personality, gender, and age in the language of social media: The Open-Vocabulary Approach. PLOS ONE, 8(9), . . e73791.
+Based on [Schwartz, H. A., Eichstaedt, J. C., Kern, M. L., Dziurzynski, L., Ramones, S. M., Agrawal, M., Shah, A., Kosinski, M., Stillwell, D., Seligman, M. E., & Ungar, L. H. (2013). Personality, Gender, and Age in the Language of Social Media: The Open-Vocabulary Approach. PLOS ONE, 8(9), e73791.](http://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0073791&type=printable)
 
 ### Lexicon
 Using the gender lexicon data from [WWBP](http://www.wwbp.org/lexica.html) under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/).

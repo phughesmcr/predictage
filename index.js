@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v0.5.1
+ * v1.0.0-rc.1
  *
  * Predict the age of a string's author.
  *
@@ -23,171 +23,50 @@
  *
  * Usage example:
  * const pa = require('predictage');
- * // These are the default options
- * const opts = {
- *  'output': 'age'
+ * const opts = {  // These are the default options
+ *  'encoding': 'freq',
+ *  'max': Number.POSITIVE_INFINITY,
+ *  'min': Number.NEGATIVE_INFINITY,
  *  'nGrams': true,
- *  'wcGrams': false,
+ *  'output': 'age',
+ *  'places': 16,
  *  'sortBy': 'lex',
- *  'places': 7
+ *  'wcGrams': false,
  * }
  * const text = 'A big long string of text...';
  * const age = pa(text, opts);
  * console.log(age)
  *
+ * See README.md for help.
+ *
  * @param {string} str input string
  * @param {Object} opts options object
- * @return {(number|Array)} predicted age or array of matched words
+ * @return {(number|Array|Object)} predicted age, matched words, or both
  */
 
 'use strict'
 ;(function() {
-  const root = this;
-  const previous = root.predictAge;
+  const global = this;
+  const previous = global.predictAge;
 
-  let lexicon = root.lexicon;
-  let simplengrams = root.simplengrams;
-  let tokenizer = root.tokenizer;
+  let lexicon = global.lexicon;
+  let simplengrams = global.simplengrams;
+  let tokenizer = global.tokenizer;
+  let lexHelpers = global.lexHelpers;
 
   if (typeof lexicon === 'undefined') {
     if (typeof require !== 'undefined') {
-      tokenizer = require('happynodetokenizer');
       lexicon = require('./data/lexicon.json');
       simplengrams = require('simplengrams');
-    } else throw new Error('predictAge required packages not found!');
+      tokenizer = require('happynodetokenizer');
+      lexHelpers = require('lex-helpers');
+    } else throw new Error('predictAge required modules not found!');
   }
 
-  /**
-   * Get the indexes of duplicate elements in an array
-   * @function indexesOf
-   * @param  {Array} arr input array
-   * @param  {string} str string to test against
-   * @return {Array} array of indexes
-   */
-  const indexesOf = (arr, str) => {
-    const idxs = [];
-    let i = arr.length;
-    while (i--) {
-      if (arr[i] === str) {
-        idxs.unshift(i);
-      }
-    }
-    return idxs;
-  };
-
-  /**
-   * Combines multidimensional array elements into strings
-   * @function arr2string
-   * @param  {Array} arr input array
-   * @return {Array} output array
-   */
-  const arr2string = (arr) => {
-    let i = 0;
-    const len = arr.length;
-    const result = [];
-    for (i; i < len; i++) {
-      result.push(arr[i].join(' '));
-    }
-    return result;
-  };
-
-  /**
-   * Sort and return an array by column
-   * @function sortByUse
-   * @param  {Array} arr input array
-   * @param  {string} by  what to sort by
-   * @return {Array}
-   */
-  const sortArrBy = (arr, by) => {
-    let x = 3; // default to sort by lexical value
-    if (by === 'weight') {
-      x = 2;
-    } else if (by === 'freq') {
-      x = 1;
-    }
-    const sorter = (a, b) => {
-      return a[x] - b[x];
-    };
-    return arr.sort(sorter);
-  };
-
-  /**
-   * Prepare an object to be sorted by sortArrBy
-   * @function prepareMatches
-   * @param  {Object} obj input object
-   * @param  {string} by  string
-   * @param  {number} wc  word count
-   * @param  {number} places  decimal places
-   * @return {Array} sorted array
-   */
-  const prepareMatches = (obj, by, wc, places) => {
-    let matches = [];
-    for (let word in obj) {
-      if (!obj.hasOwnProperty(word)) continue;
-      let lex = (Number(obj[word][1]) / wc) * Number(obj[word][2]);
-      lex = Number(lex.toFixed(places));
-      matches.push([obj[word][0], obj[word][1], obj[word][2], lex]);
-    }
-    return sortArrBy(matches, by);
-  };
-
-  /**
-  * Match an array against a lexicon object
-  * @function getMatches
-  * @param {Array} arr token array
-  * @param {Object} lexicon lexicon object
-  * @param {number} places decimal places
-  * @return {Object} object of matches
-  */
-  const getMatches = (arr, lexicon, places) => {
-    const matches = {};
-    // loop through the lexicon categories
-    let category;
-    for (category in lexicon) {
-      if (!lexicon.hasOwnProperty(category)) continue;
-      let match = [];
-      // loop through words in category
-      let data = lexicon[category];
-      let word;
-      for (word in data) {
-        if (!data.hasOwnProperty(word)) continue;
-        // if word from input matches word from lexicon ...
-        if (arr.indexOf(word) > -1) {
-          let weight = Number((data[word]).toFixed(places));
-          // reps: number of times word appears in text
-          let reps = indexesOf(arr, word).length;
-          let item = [word, reps, weight];
-          match.push(item);
-        }
-      }
-      matches[category] = match;
-    }
-    // return matches object
-    return matches;
-  };
-
-  /**
-  * Calculate the total lexical value of matches
-  * @function calcLex
-  * @param {Object} obj matches object
-  * @param {number} wc wordcount
-  * @param {number} int intercept value
-  * @param {number} places decimal places
-  * @return {number} lexical value
-  */
-  const calcLex = (obj, wc, int, places) => {
-    let word;
-    let lex = 0;
-    for (word in obj) {
-      if (!obj.hasOwnProperty(word)) continue;
-      // (word frequency / total wordcount) * weight
-      lex += (Number(obj[word][1]) / wc) * Number(obj[word][2]);
-    }
-    // add intercept value
-    lex += int;
-    // return final lexical value
-    return Number(lex.toFixed(places));
-  };
+  const arr2string = lexHelpers.arr2string;
+  const prepareMatches = lexHelpers.prepareMatches;
+  const getMatches = lexHelpers.getMatches;
+  const calcLex = lexHelpers.calcLex;
 
   /**
   * @function predictAge
@@ -197,32 +76,46 @@
   */
   const predictAge = (str, opts) => {
     // no string return null
-    if (!str) return null;
+    if (!str) {
+      console.error('predictAge: no string found. Returning null.');
+      return null;
+    }
     // if str isn't a string, make it into one
     if (typeof str !== 'string') str = str.toString();
     // trim whitespace and convert to lowercase
     str = str.toLowerCase().trim();
     // options defaults
-    if (!opts) {
+    if (!opts || typeof opts !== 'object') {
       opts = {
-        'output': 'age',
+        'encoding': 'freq',
+        'max': Number.POSITIVE_INFINITY,
+        'min': Number.NEGATIVE_INFINITY,
         'nGrams': true,
-        'wcGrams': false,
-        'sortBy': 'lex',
+        'output': 'age',
         'places': 16,
+        'sortBy': 'lex',
+        'wcGrams': false,
       };
     }
-    opts.output = opts.output || 'age';
-    opts.sortBy = opts.sortBy || 'lex';
+    opts.encoding = opts.encoding || 'freq';
+    opts.max = opts.max || Number.POSITIVE_INFINITY;
+    opts.min = opts.min || Number.NEGATIVE_INFINITY;
     opts.nGrams = opts.nGrams || true;
-    opts.wcGrams = opts.wcGrams || false;
+    opts.output = opts.output || 'age';
     opts.places = opts.places || 16;
+    opts.sortBy = opts.sortBy || 'lex';
+    opts.wcGrams = opts.wcGrams || false;
+    const encoding = opts.encoding;
     const output = opts.output;
     const places = opts.places;
+    const sortBy = opts.sortBy;
     // convert our string to tokens
     let tokens = tokenizer(str);
     // if there are no tokens return null
-    if (!tokens) return null;
+    if (!tokens) {
+      console.warn('predictAge: no tokens found. Returned null.');
+      return null;
+    }
     // get wordcount before we add ngrams
     let wordcount = tokens.length;
     // get n-grams
@@ -234,16 +127,28 @@
     // recalculate wordcount if wcGrams is true
     if (opts.wcGrams) wordcount = tokens.length;
     // get matches from array
-    const matches = getMatches(tokens, lexicon, places);
+    const matches = getMatches(tokens, lexicon, opts.min, opts.max);
     // return requested output
     if (output === 'matches') {
-      return prepareMatches(matches.AGE, opts.sortBy, wordcount, places);
+      return prepareMatches(matches.AGE, sortBy, wordcount, places,
+          encoding);
     }
-    let age = calcLex(matches.AGE, wordcount, 23.2188604687, places);
-    if (output === 'age') {
-      return Number(age.toFixed());
-    } else {
+    let age = calcLex(matches.AGE, 23.2188604687, places, encoding, wordcount);
+    if (output === 'lex') {
       return age;
+    } else if (output === 'full') {
+      const full = {};
+      full.lex = age;
+      full.age = Number(age.toFixed());
+      full.matches = prepareMatches(matches.AGE, sortBy, wordcount, places,
+          encoding);
+      return full;
+    } else {
+      if (output !== 'age') {
+        console.warn('predictAge: output option ("' + output +
+            '") is invalid, defaulting to "age".');
+      }
+      return Number(age.toFixed());
     }
   };
 

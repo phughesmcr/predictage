@@ -1,10 +1,11 @@
 {
   "name": "predictage",
-  "version": "0.5.1",
+  "version": "1.0.0-rc.1",
   "description": "Predict the age of a string's author",
   "main": "index.js",
   "dependencies": {
     "happynodetokenizer": "^0.2.0",
+    "lex-helpers": "^0.0.3",
     "simplengrams": "^0.1.0"
   },
   "keywords": [
