@@ -11,7 +11,7 @@ const opts = {  // These are the default options
   'min': Number.NEGATIVE_INFINITY,
   'nGrams': true,
   'output': 'age',
-  'places': 16,
+  'places': 9,
   'sortBy': 'lex',
   'wcGrams': false,
 }

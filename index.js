@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v1.0.0-rc.1
+ * v1.0.0-rc.2
  *
  * Predict the age of a string's author.
  *
@@ -29,7 +29,7 @@
  *  'min': Number.NEGATIVE_INFINITY,
  *  'nGrams': true,
  *  'output': 'age',
- *  'places': 16,
+ *  'places': 9,
  *  'sortBy': 'lex',
  *  'wcGrams': false,
  * }
@@ -92,7 +92,7 @@
         'min': Number.NEGATIVE_INFINITY,
         'nGrams': true,
         'output': 'age',
-        'places': 16,
+        'places': 9,
         'sortBy': 'lex',
         'wcGrams': false,
       };
@@ -102,7 +102,7 @@
     opts.min = opts.min || Number.NEGATIVE_INFINITY;
     opts.nGrams = opts.nGrams || true;
     opts.output = opts.output || 'age';
-    opts.places = opts.places || 16;
+    opts.places = opts.places || 9;
     opts.sortBy = opts.sortBy || 'lex';
     opts.wcGrams = opts.wcGrams || false;
     const encoding = opts.encoding;
