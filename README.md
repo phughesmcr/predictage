@@ -3,17 +3,17 @@
 Predict the age of a string's author.
 
 ## Usage
-```Javascript
+```javascript
 const pa = require('predictage')
 const opts = {  // These are the default options
   'encoding': 'freq',
   'max': Number.POSITIVE_INFINITY,
   'min': Number.NEGATIVE_INFINITY,
-  'nGrams': true,
+  'nGrams': 'true',
   'output': 'age',
   'places': 9,
   'sortBy': 'lex',
-  'wcGrams': false,
+  'wcGrams': 'false',
 }
 const text = 'A long string of text....'
 const age = pa(text, opts)
@@ -52,7 +52,7 @@ The number of decimal places can be changed using the 'places' value in the opti
 
 ### 'nGrams'
 
-**Boolean - valid options: true (default) or false**
+**String - valid options: 'true' (default) or 'false'**
 
 n-Grams are contiguous pieces of text, bi-grams being chunks of 2, tri-grams being chunks of 3, etc.
 
@@ -60,7 +60,7 @@ Use the nGrams option to include (true) or exclude (false) n-grams. For accuracy
 
 ### 'wcGrams'
 
-**Boolean - valid options: true or false (default)**
+**String - valid options: 'true' or 'false' (default)**
 
 When set to true, the output from the nGrams option will be added to the word count.
 
@@ -82,11 +82,11 @@ By default the array is sorted by final lexical value, this is so you can see wh
 
 ### 'places'
 
-**Number - valid options between 0 and 20 inclusive.**
+**Number**
 
 Number of decimal places to limit outputted values to.
 
-The default is 16 decimal places as this is accuracy level the lexicon data provides.
+The default is 9 decimal places.
 
 ### 'max' and 'min'
 

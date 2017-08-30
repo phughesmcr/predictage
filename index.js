@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v1.0.0-rc.2
+ * v1.0.0
  *
  * Predict the age of a string's author.
  *
@@ -27,11 +27,11 @@
  *  'encoding': 'freq',
  *  'max': Number.POSITIVE_INFINITY,
  *  'min': Number.NEGATIVE_INFINITY,
- *  'nGrams': true,
+ *  'nGrams': 'true',
  *  'output': 'age',
  *  'places': 9,
  *  'sortBy': 'lex',
- *  'wcGrams': false,
+ *  'wcGrams': 'false',
  * }
  * const text = 'A big long string of text...';
  * const age = pa(text, opts);
@@ -49,24 +49,24 @@
   const global = this;
   const previous = global.predictAge;
 
+  let lexHelpers = global.lexHelpers;
   let lexicon = global.lexicon;
   let simplengrams = global.simplengrams;
   let tokenizer = global.tokenizer;
-  let lexHelpers = global.lexHelpers;
 
   if (typeof lexicon === 'undefined') {
     if (typeof require !== 'undefined') {
+      lexHelpers = require('lex-helpers');
       lexicon = require('./data/lexicon.json');
       simplengrams = require('simplengrams');
       tokenizer = require('happynodetokenizer');
-      lexHelpers = require('lex-helpers');
     } else throw new Error('predictAge required modules not found!');
   }
 
   const arr2string = lexHelpers.arr2string;
-  const prepareMatches = lexHelpers.prepareMatches;
-  const getMatches = lexHelpers.getMatches;
   const calcLex = lexHelpers.calcLex;
+  const getMatches = lexHelpers.getMatches;
+  const prepareMatches = lexHelpers.prepareMatches;
 
   /**
   * @function predictAge
@@ -90,21 +90,21 @@
         'encoding': 'freq',
         'max': Number.POSITIVE_INFINITY,
         'min': Number.NEGATIVE_INFINITY,
-        'nGrams': true,
+        'nGrams': 'true',
         'output': 'age',
         'places': 9,
         'sortBy': 'lex',
-        'wcGrams': false,
+        'wcGrams': 'false',
       };
     }
     opts.encoding = opts.encoding || 'freq';
     opts.max = opts.max || Number.POSITIVE_INFINITY;
     opts.min = opts.min || Number.NEGATIVE_INFINITY;
-    opts.nGrams = opts.nGrams || true;
+    opts.nGrams = opts.nGrams || 'true';
     opts.output = opts.output || 'age';
     opts.places = opts.places || 9;
     opts.sortBy = opts.sortBy || 'lex';
-    opts.wcGrams = opts.wcGrams || false;
+    opts.wcGrams = opts.wcGrams || 'false';
     const encoding = opts.encoding;
     const output = opts.output;
     const places = opts.places;
@@ -119,13 +119,13 @@
     // get wordcount before we add ngrams
     let wordcount = tokens.length;
     // get n-grams
-    if (opts.nGrams) {
+    if (opts.nGrams.toLowerCase() === 'true') {
       const bigrams = arr2string(simplengrams(str, 2));
       const trigrams = arr2string(simplengrams(str, 3));
       tokens = tokens.concat(bigrams, trigrams);
     }
     // recalculate wordcount if wcGrams is true
-    if (opts.wcGrams) wordcount = tokens.length;
+    if (opts.wcGrams.toLowerCase() === 'true') wordcount = tokens.length;
     // get matches from array
     const matches = getMatches(tokens, lexicon, opts.min, opts.max);
     // return requested output
