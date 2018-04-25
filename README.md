@@ -38,17 +38,15 @@ Frequency encoding takes the overall wordcount and word frequency into account, 
 
 ### 'output'
 
-**String - valid options: 'age' (default), 'matches', 'lex', or 'full'**
+**String - valid options: 'lex' (default), 'matches', or 'full'**
 
-'age' (default) returns the predicted age to 0 decimal places (regardless of 'places' option).
-
-'lex' returns the lexical value, which is essentially the predicted age to 7 decimal places.
+'lex' (default) returns the lexical value, which is the predicted age to 7 decimal places.
 
 The number of decimal places can be changed using the 'places' value in the options object. Note that setting 'places' to 0 produces the same result as setting 'output' to 'age'.
 
 'matches' returns an array of matched words along with the number of times each word appears, its weight, and its final lexical value (i.e. (appearances / word count) * weight). See the output section below for an example.
 
-'full' returns an object containing the lexical value and the matches array.
+'full' returns an object containing the predicted age and the matches array. The keys are "age" and "matches".
 
 ### 'nGrams'
 

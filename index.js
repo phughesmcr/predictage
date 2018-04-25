@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v1.0.0
+ * v2.0.0
  *
  * Predict the age of a string's author.
  *
@@ -49,6 +49,7 @@
   const global = this;
   const previous = global.predictAge;
 
+  let async = global.async;
   let lexHelpers = global.lexHelpers;
   let lexicon = global.lexicon;
   let simplengrams = global.simplengrams;
@@ -56,17 +57,19 @@
 
   if (typeof lexicon === 'undefined') {
     if (typeof require !== 'undefined') {
+      async = require('async');
       lexHelpers = require('lex-helpers');
       lexicon = require('./data/lexicon.json');
       simplengrams = require('simplengrams');
       tokenizer = require('happynodetokenizer');
-    } else throw new Error('predictAge required modules not found!');
+    } else throw new Error('predictAge: required modules not found!');
   }
 
   const arr2string = lexHelpers.arr2string;
   const calcLex = lexHelpers.calcLex;
   const getMatches = lexHelpers.getMatches;
   const prepareMatches = lexHelpers.prepareMatches;
+  const itemCount = lexHelpers.itemCount;
 
   /**
   * @function predictAge
@@ -86,6 +89,7 @@
     str = str.toLowerCase().trim();
     // options defaults
     if (!opts || typeof opts !== 'object') {
+      console.warn('predictAge: using default options.');      
       opts = {
         'encoding': 'freq',
         'max': Number.POSITIVE_INFINITY,
@@ -119,13 +123,20 @@
     // get wordcount before we add ngrams
     let wordcount = tokens.length;
     // get n-grams
-    if (opts.nGrams.toLowerCase() === 'true') {
-      const bigrams = arr2string(simplengrams(str, 2));
-      const trigrams = arr2string(simplengrams(str, 3));
-      tokens = tokens.concat(bigrams, trigrams);
+    if (opts.nGrams.toLowerCase() === 'true' && wordcount > 2) {
+      async.each([2, 3], function(n, callback) {
+        tokens = tokens.concat(
+          arr2string(simplengrams(str, n))
+        );
+        callback();
+      }, function(err) {
+        if (err) console.error(err);
+      });
     }
     // recalculate wordcount if wcGrams is true
     if (opts.wcGrams.toLowerCase() === 'true') wordcount = tokens.length;
+    // reduce tokens to count item
+    tokens = itemCount(tokens);
     // get matches from array
     const matches = getMatches(tokens, lexicon, opts.min, opts.max);
     // return requested output
@@ -133,22 +144,20 @@
       return prepareMatches(matches.AGE, sortBy, wordcount, places,
           encoding);
     }
+    // else return lex / full
     let age = calcLex(matches.AGE, 23.2188604687, places, encoding, wordcount);
-    if (output === 'lex') {
-      return age;
-    } else if (output === 'full') {
-      const full = {};
-      full.lex = age;
-      full.age = Number(age.toFixed());
-      full.matches = prepareMatches(matches.AGE, sortBy, wordcount, places,
-          encoding);
-      return full;
+    if (output === 'full') {
+      return {
+        age: age,
+        matches: prepareMatches(matches.AGE, sortBy, wordcount, places,
+          encoding),
+      };
     } else {
-      if (output !== 'age') {
+      if (output !== 'lex') {
         console.warn('predictAge: output option ("' + output +
             '") is invalid, defaulting to "age".');
       }
-      return Number(age.toFixed());
+      return age;
     }
   };
 
