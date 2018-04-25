@@ -7,6 +7,8 @@ Predict the age of a string's author.
 const pa = require('predictage')
 const opts = {  // These are the default options
   'encoding': 'freq',
+  'locale': 'US',
+  'logs': 3,
   'max': Number.POSITIVE_INFINITY,
   'min': Number.NEGATIVE_INFINITY,
   'nGrams': 'true',
