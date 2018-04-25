@@ -1,19 +1,24 @@
 {
   "name": "predictage",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Predict the age of a string's author",
   "main": "index.js",
   "dependencies": {
-    "happynodetokenizer": "0.2.1",
-    "lex-helpers": "0.0.5",
-    "simplengrams": "0.1.1"
+    "british_american_translate": "^1.0.1",
+    "happynodetokenizer": "0.4.0",
+    "lex-helpers": "0.3.0",
+    "simplengrams": "0.3.2"
   },
   "keywords": [
     "psychology",
     "prediction",
     "age",
     "predict",
-    "sentiment"
+    "sentiment",
+    "personality",
+    "data",
+    "years",
+    "old"
   ],
   "author": "P. Hughes <peter@phugh.es> (https://www.phugh.es)",
   "license": "CC-BY-NC-SA-3.0",

@@ -17,7 +17,13 @@ const opts = {  // These are the default options
 }
 const text = 'A long string of text....'
 const age = pa(text, opts)
-console.log(age)
+console.log(age) // { AGE: 23.517285472 }
+```
+
+## Default Output
+By default, predictAge will output an object with an 'AGE' key:
+```javascript
+{ AGE: 23.175817246 }
 ```
 
 ## The Options Object
@@ -63,6 +69,18 @@ Use the nGrams option to include (true) or exclude (false) n-grams. For accuracy
 When set to true, the output from the nGrams option will be added to the word count.
 
 For accuracy it is recommended that this is set to false.
+
+### 'locale'
+**String - valid options: 'US' (default), 'GB'**
+The lexicon data is in American English (US), if the string(s) you want to analyse are in British English set the locale option to 'GB'.
+
+### 'logs'
+**Number - valid options: 0, 1, 2, 3 (default)**
+Used to control console.log, console.warn, and console.error outputs.
+* 0 = suppress all logs
+* 1 = print errors only
+* 2 = print errors and warnings
+* 3 = print all console logs
 
 ### 'sortBy'
 
