@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v3.0.1
+ * v3.0.2
  *
  * Predict the age of a string's author.
  *
@@ -71,10 +71,10 @@
   * @param {Object} opts options object
   * @return {Object} object with predicted age or array of matched words
   */
-  const predictAge = (str, opts) => {
+  const predictAge = (str, opts = {}) => {
     // default options
     opts.encoding = (typeof opts.encoding !== 'undefined') ? opts.encoding : 'freq';
-    opts.locale = (typeof opts.logs !== 'undefined') ? opts.logs : 'US';
+    opts.locale = (typeof opts.locale !== 'undefined') ? opts.locale : 'US';
     opts.logs = (typeof opts.logs !== 'undefined') ? opts.logs : 3;
     if (opts.suppressLog) opts.logs = 0;
     opts.max = (typeof opts.max !== 'undefined') ? opts.max : Number.POSITIVE_INFINITY;
@@ -143,7 +143,7 @@
     if (opts.wcGrams) wordcount = tokens.length; 
     // get matches from array
     const matches = getMatches(itemCount(tokens), lexicon, opts.min, opts.max);
-    // define intercept values (from Preotiuc-Pietro et al.)
+    // define intercept values
     const ints = {AGE: 23.2188604687};
     // return requested output
     if (output.match(/matches/gi)) {
