@@ -8,18 +8,19 @@ const pa = require('predictage')
 const opts = {  // These are the default options
   'encoding': 'freq',
   'locale': 'US',
-  'logs': 3,
+  'logs': 2,
   'max': Number.POSITIVE_INFINITY,
   'min': Number.NEGATIVE_INFINITY,
-  'nGrams': 'true',
+  'nGrams': [2, 3],
+  'noInt': false,
   'output': 'age',
   'places': 9,
   'sortBy': 'lex',
-  'wcGrams': 'false',
+  'wcGrams': false,
 }
 const text = 'A long string of text....'
 const age = pa(text, opts)
-console.log(age) // { AGE: 23.517285472 }
+console.log(age) // { AGE: 23.175817246 }
 ```
 
 ## Default Output
@@ -34,7 +35,7 @@ The options object is optional and provides a number of controls to allow you to
 
 ### 'encoding'
 
-**String - valid options: 'freq' (default), 'binary'**
+**String - valid options: 'freq' (default), 'binary', or 'percent'**
 
 N.B - You probably don't want to change this, ever.
 
@@ -43,6 +44,70 @@ Controls how the lexical value is calculated.
 Binary is simply the addition of lexical weights, i.e. word1 + word2 + word3.
 
 Frequency encoding takes the overall wordcount and word frequency into account, i.e. (word frequency / word count) * weight.
+
+Percent returns the percentage of token matches in each category as a decimal, i.e. 0.48 - 48%.
+
+### 'locale'
+**String - valid options: 'US' (default), 'GB'**
+The lexicon data is in American English (US), if the string(s) you want to analyse are in British English set the locale option to 'GB'.
+
+### 'logs'
+**Number - valid options: 0, 1, 2 (default), 3**
+Used to control console.log, console.warn, and console.error outputs.
+* 0 = suppress all logs
+* 1 = print errors only
+* 2 = print errors and warnings
+* 3 = print all console logs
+
+### 'max' and 'min'
+
+**Float**
+
+Exclude words that have weights above the max threshold or below the min threshold.
+
+By default these are set to infinity, ensuring that no words from the lexicon are excluded.
+
+### 'nGrams'
+
+**Array - valid options: [ number, number, ...]**
+
+n-Grams are contiguous pieces of text, bi-grams being chunks of 2, tri-grams being chunks of 3, etc.
+
+Use the nGrams option to include n-gram chunks. For example if you want to include both bi-grams and tri-grams, use like so:
+
+```javascript
+{
+  nGrams: [2, 3]
+}
+```
+
+If you only want to include tri-grams:
+
+```javascript
+{
+  nGrams: [3]
+}
+```
+
+To disable n-gram inclusion, use the following:
+
+```javascript
+{
+  nGrams: [0]
+}
+```
+
+If the number of words in the string is less than the ngram number provided, the option will simply be ignored.
+
+For accuracy it is recommended that n-grams are included, however including n-grams for very long strings can affect performance.
+
+### 'noInt'
+
+**Boolean - valid options: true or false (default)**
+
+The lexica contain intercept values, set noInt to true to ignore these values.
+
+Unless you have a specific need to ignore the intercepts, it is recommended you leave this set to false.
 
 ### 'output'
 
@@ -56,33 +121,13 @@ The number of decimal places can be changed using the 'places' value in the opti
 
 'full' returns an object containing the predicted age and the matches array. The keys are "age" and "matches".
 
-### 'nGrams'
+### 'places'
 
-**String - valid options: 'true' (default) or 'false'**
+**Number**
 
-n-Grams are contiguous pieces of text, bi-grams being chunks of 2, tri-grams being chunks of 3, etc.
+Number of decimal places to limit outputted values to.
 
-Use the nGrams option to include (true) or exclude (false) n-grams. For accuracy it is recommended that n-grams are included, however including n-grams for very long strings can detrement performance.
-
-### 'wcGrams'
-
-**String - valid options: 'true' or 'false' (default)**
-
-When set to true, the output from the nGrams option will be added to the word count.
-
-For accuracy it is recommended that this is set to false.
-
-### 'locale'
-**String - valid options: 'US' (default), 'GB'**
-The lexicon data is in American English (US), if the string(s) you want to analyse are in British English set the locale option to 'GB'.
-
-### 'logs'
-**Number - valid options: 0, 1, 2, 3 (default)**
-Used to control console.log, console.warn, and console.error outputs.
-* 0 = suppress all logs
-* 1 = print errors only
-* 2 = print errors and warnings
-* 3 = print all console logs
+The default is 9 decimal places.
 
 ### 'sortBy'
 
@@ -98,22 +143,13 @@ If 'output' = 'matches', this option can be used to control how the outputted ar
 
 By default the array is sorted by final lexical value, this is so you can see which words had the greatest impact on the prediction - i.e. the words which decrement the age the most appear at the beginning of the array, the words which increment the age the most appear at the end.
 
-### 'places'
+### 'wcGrams'
 
-**Number**
+**Boolean - valid options: true or false (default)**
 
-Number of decimal places to limit outputted values to.
+When set to true, the output from the nGrams option will be added to the word count.
 
-The default is 9 decimal places.
-
-### 'max' and 'min'
-
-**Float**
-
-Exclude words that have weights above the max threshold or below the min threshold.
-
-By default these are set to infinity, ensuring that no words from the lexicon are excluded.
-
+For accuracy it is recommended that this is set to false.
 
 ## {'output': 'matches'} output example
 Setting "output" to "matches" in the options object makes predictAge output an array containing information about the lexical matches in your query.
@@ -147,7 +183,7 @@ By default the matches output array is sorted ascending by lexical value. This c
 Based on [Schwartz, H. A., Eichstaedt, J. C., Kern, M. L., Dziurzynski, L., Ramones, S. M., Agrawal, M., Shah, A., Kosinski, M., Stillwell, D., Seligman, M. E., & Ungar, L. H. (2013). Personality, Gender, and Age in the Language of Social Media: The Open-Vocabulary Approach. PLOS ONE, 8(9), e73791.](http://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0073791&type=printable)
 
 ### Lexicon
-Using the gender lexicon data from [WWBP](http://www.wwbp.org/lexica.html) under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/).
+Using the gender lexicon data from [WWBP](http://www.wwbp.org/lexica.html) under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/) license.
 
 ## License
 (C) 2017-18 [P. Hughes](https://www.phugh.es). All rights reserved.
