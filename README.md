@@ -2,29 +2,30 @@
 
 Predict the age of a string's author.
 
+When used to analyse social media posts (i.e Facebook posts, Tweets), predictAge has an ~83% accuracy rate.
+
 ## Usage
 ```javascript
-const pa = require('predictage')
-const opts = {  // These are the default options
+const age = require('predictage')
+// These are the default and recommended options
+const opts = {  
   'encoding': 'freq',
   'locale': 'US',
-  'logs': 2,
+  'logs': 3,
   'max': Number.POSITIVE_INFINITY,
   'min': Number.NEGATIVE_INFINITY,
-  'nGrams': [2, 3],
   'noInt': false,
-  'output': 'age',
-  'places': 9,
+  'output': 'lex',
+  'places': undefined,
   'sortBy': 'lex',
-  'wcGrams': false,
 }
 const text = 'A long string of text....'
-const age = pa(text, opts)
-console.log(age) // { AGE: 23.175817246 }
+const output = age(text, opts)
+console.log(output) // { AGE: 23.175817246 }
 ```
 
 ## Default Output
-By default, predictAge will output an object with an 'AGE' key:
+Using the default options (i.e. {output: 'lex'}), predictAge will output an object with an 'AGE' key:
 ```javascript
 { AGE: 23.175817246 }
 ```
@@ -52,7 +53,7 @@ Percent returns the percentage of token matches in each category as a decimal, i
 The lexicon data is in American English (US), if the string(s) you want to analyse are in British English set the locale option to 'GB'.
 
 ### 'logs'
-**Number - valid options: 0, 1, 2 (default), 3**
+**Number - valid options: 0, 1, 2, 3 (default)**
 Used to control console.log, console.warn, and console.error outputs.
 * 0 = suppress all logs
 * 1 = print errors only
@@ -66,40 +67,6 @@ Used to control console.log, console.warn, and console.error outputs.
 Exclude words that have weights above the max threshold or below the min threshold.
 
 By default these are set to infinity, ensuring that no words from the lexicon are excluded.
-
-### 'nGrams'
-
-**Array - valid options: [ number, number, ...]**
-
-n-Grams are contiguous pieces of text, bi-grams being chunks of 2, tri-grams being chunks of 3, etc.
-
-Use the nGrams option to include n-gram chunks. For example if you want to include both bi-grams and tri-grams, use like so:
-
-```javascript
-{
-  nGrams: [2, 3]
-}
-```
-
-If you only want to include tri-grams:
-
-```javascript
-{
-  nGrams: [3]
-}
-```
-
-To disable n-gram inclusion, use the following:
-
-```javascript
-{
-  nGrams: [0]
-}
-```
-
-If the number of words in the string is less than the ngram number provided, the option will simply be ignored.
-
-For accuracy it is recommended that n-grams are included, however including n-grams for very long strings can affect performance.
 
 ### 'noInt'
 
@@ -123,11 +90,11 @@ The number of decimal places can be changed using the 'places' value in the opti
 
 ### 'places'
 
-**Number**
+**Number - valid options between 0 and 20 inclusive.**
 
 Number of decimal places to limit outputted values to.
 
-The default is 9 decimal places.
+The default is "undefined" which will simply return the value unchanged.
 
 ### 'sortBy'
 
@@ -142,14 +109,6 @@ If 'output' = 'matches', this option can be used to control how the outputted ar
 'freq' sorts by word frequency, i.e. the most used words appear first.
 
 By default the array is sorted by final lexical value, this is so you can see which words had the greatest impact on the prediction - i.e. the words which decrement the age the most appear at the beginning of the array, the words which increment the age the most appear at the end.
-
-### 'wcGrams'
-
-**Boolean - valid options: true or false (default)**
-
-When set to true, the output from the nGrams option will be added to the word count.
-
-For accuracy it is recommended that this is set to false.
 
 ## {'output': 'matches'} output example
 Setting "output" to "matches" in the options object makes predictAge output an array containing information about the lexical matches in your query.
