@@ -1,6 +1,6 @@
 /**
  * predictAge
- * v4.0.0
+ * v4.0.1
  *
  * Predict the age of a string's author.
  *
