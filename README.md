@@ -118,13 +118,23 @@ Each match between the lexicon and your input is pushed into an array which cont
 By default the matches output array is sorted ascending by lexical value. This can be controlled using the "sortBy" option.
 
 ```javascript
-[
-  [ 'magnificent', 1, -192.0206116, -1.3914537072463768 ],
-  [ 'capital', 1, -133.9311307, -0.9705154398550726 ],
-  [ 'note', 3, -34.83417005, -0.7572645663043478 ],
-  [ 'america', 2, -49.21227355, -0.7132213557971014 ],
-  [ 'republic', 1, -75.5720402, -0.5476234797101449 ]
-]
+{
+  AGE: {
+    matches: [ 
+      [ 'magnificent', 1, -192.0206116, -1.3914537072463768 ],
+      [ 'capital', 1, -133.9311307, -0.9705154398550726 ],
+      [ 'note', 3, -34.83417005, -0.7572645663043478 ],
+      [ 'america', 2, -49.21227355, -0.7132213557971014 ],
+      [ 'republic', 1, -75.5720402, -0.5476234797101449 ]
+    ],
+    info: {
+      total_matches: 100,
+      total_unique_matches: 63,
+      total_tokens: 200,
+      percent_matches: 50,
+    },
+  }
+}
 ```
 
 | Term          | Frequency | Weight (value)| Lexical Value (group norm) |
