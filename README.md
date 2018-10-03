@@ -7,6 +7,23 @@ When used to analyse social media posts (i.e Facebook posts, Tweets), using just
 ## Usage
 ```javascript
 const age = require('predictage')
+const text = 'A long string of text....'
+const output = age(text)
+console.log(output) // { AGE: 23.175817246 }
+```
+
+## Default Output
+Using the default options (i.e. {output: 'lex'}), predictAge will output an object with an 'AGE' key:
+```javascript
+{ AGE: 23.175817246 }
+```
+
+## The Options Object
+
+The options object is optional and provides a number of controls to allow you to tailor the output to your needs. However, for general use it is recommended that all options are left to their defaults.
+
+```javascript
+const age = require('predictage')
 // These are the default and recommended options
 const opts = {  
   'encoding': 'freq',
@@ -23,16 +40,6 @@ const text = 'A long string of text....'
 const output = age(text, opts)
 console.log(output) // { AGE: 23.175817246 }
 ```
-
-## Default Output
-Using the default options (i.e. {output: 'lex'}), predictAge will output an object with an 'AGE' key:
-```javascript
-{ AGE: 23.175817246 }
-```
-
-## The Options Object
-
-The options object is optional and provides a number of controls to allow you to tailor the output to your needs. However, for general use it is recommended that all options are left to their defaults.
 
 ### 'encoding'
 
