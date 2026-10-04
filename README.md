@@ -1,3 +1,8 @@
+> [!NOTE]
+> This project has been consolidated into **[wwbnlp — World Wellbeing NLP](https://github.com/phughesmcr/wwbnlp)**.
+> See the **[migration guide](https://github.com/phughesmcr/wwbnlp/blob/main/docs/migration.md)** for the new unified API, model IDs and intentional behavior changes.
+> This repository is archived for historical reference. Existing npm releases remain available; `wwbnlp` npm publication is pending.
+
 # predictAge - Node.js based age prediction!
 
 Predict the age of a string's author.
